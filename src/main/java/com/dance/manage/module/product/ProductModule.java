@@ -37,8 +37,10 @@ public class ProductModule {
     public String productList(@Param("order") Boolean order,HttpServletRequest request)
     {
         List<ProductInfo> productList = dao.query(ProductInfo.class,null);
+        int total = dao.count(ProductInfo.class,null);
         request.setAttribute("productList",productList);
         request.setAttribute("order",order);
+        request.setAttribute("total",total);
        return null;
     }
 

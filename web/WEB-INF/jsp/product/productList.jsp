@@ -26,8 +26,8 @@
 </head>
 <body class="pos-r">
 <div>
-	<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 产品管理 <span class="c-gray en">&gt;</span>
-        产品列表 <a class="btn btn-success radius r mr-20" id="refreshDiv" style="line-height:1.6em;margin-top:3px" href="javascript:void(0);"onclick="refreshDiv();" title="刷新" >
+	<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 品种 <span class="c-gray en">&gt;</span>
+        品种列表 <a class="btn btn-success radius r mr-20" id="refreshDiv" style="line-height:1.6em;margin-top:3px" href="javascript:void(0);"onclick="refreshDiv();" title="刷新" >
             <i class="Hui-iconfont">&#xe68f;</i></a></nav>
 	<div class="pd-20">
 		<div class="cl pd-5 bg-1 bk-gray mt-20">
@@ -39,7 +39,7 @@
                     <a class="btn btn-primary radius" onclick="checkProduct();" href="javascript:void(0);">确定</a>
                 </c:if>
             </span>
-            <span class="r">共有数据：<strong>54</strong> 条</span>
+            <span class="r">共有数据：<strong>${total}</strong> 条</span>
         </div>
 		<div class="mt-20">
 			<table class="table table-border table-bordered table-bg table-hover table-sort">

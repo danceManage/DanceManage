@@ -28,7 +28,8 @@
 <meta name="description" content="H-ui.admin v2.3，是一款由国人开发的轻量级扁平化网站后台模板，完全免费开源的网站后台管理系统模版，适合中小型CMS后台系统。">
 </head>
 <body>
-<header class="Hui-header cl"> <a class="Hui-logo l" title="H-ui.admin v2.3" href="/">H-ui.admin</a> <a class="Hui-logo-m l" href="/" title="H-ui.admin">H-ui</a> <span class="Hui-subtitle l">V2.3</span>
+<header class="Hui-header cl"> <a class="Hui-logo l" title="H-ui.admin v2.3" href="/">星辉</a>
+    <a class="Hui-logo-m l" href="/" title="H-ui.admin">H-ui</a> <span class="Hui-subtitle l">V1.0</span>
 	<nav class="mainnav cl" id="Hui-nav">
 		<ul>
 			<li class="dropDown dropDown_click"><a href="javascript:;" class="dropDown_A"><i class="Hui-iconfont">&#xe600;</i> 新增 <i class="Hui-iconfont">&#xe6d5;</i></a>
@@ -36,7 +37,7 @@
 					<%--<li><a href="javascript:;" onclick="article_add('添加资讯','article-add.html')"><i class="Hui-iconfont">&#xe616;</i> 资讯</a></li>
 					<li><a href="javascript:;" onclick="picture_add('添加资讯','picture-add.html')"><i class="Hui-iconfont">&#xe613;</i> 图片</a></li>
 					<li><a href="javascript:;" onclick="product_add('添加资讯','product-add.html')"><i class="Hui-iconfont">&#xe620;</i> 产品</a></li>--%>
-					<li><a href="javascript:;" onclick="member_add('添加用户','/user/addUser.do','500','310')"><i class="Hui-iconfont">&#xe60d;</i> 用户</a></li>
+					<li><a href="javascript:;" onclick="member_add('添加用户','/user/addCustomer.do','500','310')"><i class="Hui-iconfont">&#xe60d;</i> 用户</a></li>
 				</ul>
 			</li>
 		</ul>
@@ -53,12 +54,12 @@
 		<li id="Hui-msg"> <a href="#" title="消息"><span class="badge badge-danger">1</span><i class="Hui-iconfont" style="font-size:18px">&#xe68a;</i></a> </li>
 		<li id="Hui-skin" class="dropDown right dropDown_hover"><a href="javascript:;" title="换肤"><i class="Hui-iconfont" style="font-size:18px">&#xe62a;</i></a>
 			<ul class="dropDown-menu radius box-shadow">
-				<li><a href="javascript:;" data-val="default" title="默认（黑色）">默认（黑色）</a></li>
-				<li><a href="javascript:;" data-val="blue" title="蓝色">蓝色</a></li>
-				<li><a href="javascript:;" data-val="green" title="绿色">绿色</a></li>
-				<li><a href="javascript:;" data-val="red" title="红色">红色</a></li>
-				<li><a href="javascript:;" data-val="yellow" title="黄色">黄色</a></li>
-				<li><a href="javascript:;" data-val="orange" title="绿色">橙色</a></li>
+				<li><a href="javascript:void(0);" data-val="default" title="默认（黑色）">默认（黑色）</a></li>
+				<li><a href="javascript:void(0);" data-val="blue" title="蓝色">蓝色</a></li>
+				<li><a href="javascript:void(0);" data-val="green" title="绿色">绿色</a></li>
+				<li><a href="javascript:void(0);" data-val="red" title="红色">红色</a></li>
+				<li><a href="javascript:void(0);" data-val="yellow" title="黄色">黄色</a></li>
+				<li><a href="javascript:void(0);" data-val="orange" title="绿色">橙色</a></li>
 			</ul>
 		</li>
 	</ul>
@@ -71,6 +72,8 @@
             <dd>
                 <ul>
                     <li><a _href="/user/userList.do" href="javascript:void(0)">角色管理</a></li>
+                    <li><a _href="/customer/customerList.do" href="javascript:void(0)">客户管理</a></li>
+                    <li><a _href="/sender/senderList.do" href="javascript:void(0)">送货员管理</a></li>
                 </ul>
             </dd>
         </dl>
@@ -83,7 +86,7 @@
                 </ul>
             </dd>
         </dl>
-		<dl id="menu-article">
+		<%--<dl id="menu-article">
 			<dt><i class="Hui-iconfont">&#xe616;</i> 资讯管理<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
 			<dd>
 				<ul>
@@ -130,7 +133,7 @@
 					<li><a _href="system-base.html" href="javascript:void(0)">系统设置</a></li>
 				</ul>
 			</dd>
-		</dl>
+		</dl>--%>
 	</div>
 </aside>
 <div class="dislpayArrow"><a class="pngfix" href="javascript:void(0);" onClick="displaynavbar(this)"></a></div>

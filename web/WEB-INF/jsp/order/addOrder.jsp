@@ -17,6 +17,7 @@
     <link href="/css/H-ui.min.css" rel="stylesheet" type="text/css" />
     <link href="/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
     <link href="/css/iconfont.css" rel="stylesheet" type="text/css" />
+    <link href="/css/iconfont/iconfont.css" rel="stylesheet" type="text/css" />
     <!--[if IE 6]>
     <script type="text/javascript" src="/script/DD_belatedPNG_0.0.8a-min.js" ></script>
     <script>DD_belatedPNG.fix('*');</script>
@@ -126,7 +127,7 @@
                                        oninput="computeMoneyByPrice(this);" value="${orderDetail.price}" class="input-text"/></td>
                             <td><input type="text" name="totalMoney" value="${orderDetail.totalMoney}" class="input-text"/></td>
                             <td class="td-manage">
-                                <a title="删除" href="javascript:void(0);" onclick="orderTd_del(this,'')" class="ml-5" style="text-decoration:none">
+                                <a title="删除" href="javascript:void(0);" onclick="orderTd_del(this,${orderDetail.id})" class="ml-5" style="text-decoration:none">
                                     <i class="Hui-iconfont">&#xe6e2;</i>
                                 </a>
                             </td>
@@ -134,7 +135,7 @@
                     </c:forEach>
                 </tbody>
                 <tr>
-                    <th scope="col" colspan="7" id="orderMoney" title="122.89">订单总额：122.89</th>
+                    <th scope="col" colspan="7" id="orderMoney" title="122.89" style="color: red;">订单总额：122.89</th>
                 </tr>
             </table>
         </div>
@@ -143,6 +144,9 @@
             <div class="col-7 col-offset-2" style="text-align: center;">
                 <%--<button onClick="article_save_submit();" class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 保存订单</button>--%>
                 <button onClick="saveOrder();" class="btn btn-secondary radius" type="button"><i class="Hui-iconfont">&#xe632;</i>保存订单</button>
+                <c:if test="${not empty orderInfo.id}">
+                    <button onClick="exportExcel('${orderInfo.id}');" class="btn btn-secondary radius" type="button"><i class="icon iconfont">&#xe602;</i>导出Excel</button>
+                </c:if>
                 <button onClick="layer_close();" class="btn btn-default radius" type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
             </div>
         </div>
@@ -158,6 +162,9 @@
 <script type="text/javascript" src="/icheck/jquery.icheck.min.js"></script>
 <script type="text/javascript" src="/script/jquery.json.js"></script>
 <script type="text/javascript">
+    $(document).ready(function(){
+        countMoney();
+    });
     $(function(){
         $('.skin-minimal input').iCheck({
             checkboxClass: 'icheckbox-blue',
@@ -180,12 +187,27 @@
         layer_show(title,url,w,h);
     }
 
+    function countMoney()
+    {
+        var orderMoney = 0;
+        $("#orderTbody").find("input[name='totalMoney']").each(function(){
+            orderMoney = orderMoney + parseFloat($(this).val());
+        });
+        $("#orderMoney").attr("title",orderMoney.toFixed(2));
+        $("#orderMoney").text("订单总额：" + orderMoney.toFixed(2));
+    }
+
     function changeCustomer(obj)
     {
         var customerPhone = $($(obj).find("option:selected")[0]).attr("tphone");
         var customerAddress = $($(obj).find("option:selected")[0]).attr("taddress");
         $("#customerAddress").val(customerAddress);
         $("#customerPhone").val(customerPhone);
+    }
+
+    function exportExcel(orderId)
+    {
+        location.href = '/order/excel/export.do?id=' + orderId;
     }
 
     function saveOrder()
@@ -198,6 +220,16 @@
         var senderId = $("#senderId").val();
         var senderDate = $("#senderDate").val();
         var totalMoney = $("#totalMoney").val();
+        if(senderId.length == 0)
+        {
+            layer.alert("请选择送货人");
+            return;
+        }
+        if(customerId.length == 0)
+        {
+            layer.alert("请选择客户");
+            return;
+        }
         $.ajax({
             url : "/order/saveOrder.do",
             contentType: "application/x-www-form-urlencoded; charset=utf-8",
@@ -219,6 +251,36 @@
         });
     }
 
+
+    function orderTd_del(obj,ids)
+    {
+        if(confirm("确认删除？"))
+        {
+            if(ids.length == 0)
+            {
+                $(obj).parent().parent().remove();
+            }
+            else
+            {
+                $.ajax({
+                    url : "/order/delOrderDetail.do",
+                    contentType: "application/x-www-form-urlencoded; charset=utf-8",
+                    dataType:"json",
+                    type:"POST",
+                    async:false,
+                    data: $.toJSON({id:ids}),
+                    success: function(re)
+                    {
+                        if(re.ok)
+                        {
+                            $(obj).parent().parent().remove();
+                            layer.msg('已删除!',{icon:1,time:1000});
+                        }
+                    }
+                });
+            }
+        }
+    }
 
     function saveOrderDetail(orderId)
     {

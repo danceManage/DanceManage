@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="poi-3.6">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../java/maveHome/org/apache/poi/poi/3.6/poi-3.6.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -1,5 +1,7 @@
-package com.dance.manage.bean.order;
+package com.dance.manage.bean.user;
 
+import org.nutz.dao.entity.annotation.Column;
+import org.nutz.dao.entity.annotation.Id;
 import org.nutz.dao.entity.annotation.Table;
 
 import java.util.Date;
@@ -16,14 +18,19 @@ import java.util.Date;
 @Table("customerInfo")
 public class CustomerInfo {
 
+    @Id
     private int id;
 
+    @Column("customerName")
     private String customerName;
 
+    @Column("customerPhone")
     private String customerPhone;
 
+    @Column("customerAddress")
     private String customerAddress;
 
+    @Column("createTIme")
     private Date createTIme;
 
     public int getId()

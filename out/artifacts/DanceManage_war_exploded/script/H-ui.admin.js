@@ -234,6 +234,7 @@ function computeMoney(obj)
     trParent.find("input[name='totalMoney']").each(function(){
         $(this).val(( amount * price ).toFixed(2));
     });
+    countMoney();
 }
 
 function computeMoneyByPrice(obj)
@@ -246,9 +247,5 @@ function computeMoneyByPrice(obj)
     {
         totalMoney.val((price * amount).toFixed(2));
     }
-}
-
-function orderTd_del()
-{
-
+    countMoney();
 }
