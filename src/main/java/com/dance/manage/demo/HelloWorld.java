@@ -1,5 +1,9 @@
 package com.dance.manage.demo;
 
+import com.dance.manage.bean.user.UserInfo;
+import org.nutz.dao.Dao;
+import org.nutz.ioc.loader.annotation.Inject;
+import org.nutz.ioc.loader.annotation.IocBean;
 import org.nutz.mvc.annotation.At;
 import org.nutz.mvc.annotation.Ok;
 
@@ -12,12 +16,17 @@ import org.nutz.mvc.annotation.Ok;
  * @version 1.0
  * @Date 16/5/20
  */
-public class HelloWorld {
+@IocBean
+public class HelloWorld{
+
+    @Inject
+    protected Dao dao;
 
     @At("/hello")
     @Ok("jsp:jsp.helloWorld")
     public String doHello()
     {
+        System.out.println("=====dao:" + dao.count(UserInfo.class));
         return "Hello Nutz";
     }
 
