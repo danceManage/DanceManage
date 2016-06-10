@@ -26,9 +26,10 @@
 </head>
 <body>
 <div class="pd-20">
-    <a class="btn btn-success radius r mr-20" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" >
+    <a class="btn btn-success radius r mr-20" style="line-height:1.6em;margin-top:3px" id="refreshOrderDetail" onclick="orderRefresh(${orderInfo.id});" href="javascript:void(0);" title="刷新" >
         <i class="Hui-iconfont">&#xe68f;</i></a>
     <form action="" method="post" class="form form-horizontal" id="form-article-add">
+        <input type="hidden" id="orderId" name="orderId" value="${orderInfo.id}"/>
         <div class="row cl">
             <label class="form-label col-2"><span class="c-red">*</span>订单编号：</label>
             <div class="formControls col-2">
@@ -135,7 +136,7 @@
                     </c:forEach>
                 </tbody>
                 <tr>
-                    <th scope="col" colspan="7" id="orderMoney" title="122.89" style="color: red;">订单总额：122.89</th>
+                    <th scope="col" colspan="7" id="orderMoney" title="" style="color: red;">-</th>
                 </tr>
             </table>
         </div>
@@ -145,9 +146,9 @@
                 <%--<button onClick="article_save_submit();" class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 保存订单</button>--%>
                 <button onClick="saveOrder();" class="btn btn-secondary radius" type="button"><i class="Hui-iconfont">&#xe632;</i>保存订单</button>
                 <c:if test="${not empty orderInfo.id}">
-                    <button onClick="exportExcel('${orderInfo.id}');" class="btn btn-secondary radius" type="button"><i class="icon iconfont">&#xe602;</i>导出Excel</button>
+                    <button onclick="exportExcel('${orderInfo.id}');" class="btn btn-secondary radius" type="button"><i class="icon iconfont">&#xe602;</i>导出Excel</button>
                 </c:if>
-                <button onClick="layer_close();" class="btn btn-default radius" type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
+                <button onclick="layer_close();" class="btn btn-default radius" type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
             </div>
         </div>
     </form>
@@ -213,13 +214,13 @@
     function saveOrder()
     {
         var orderNo= "${orderNo}";
-        var orderId = "${orderInfo.id}";
+        var orderId = $("#orderId").val();
         var orderDate = $("#orderDate").val();
         var operatorId = $("#operatorId").val();
         var customerId = $("#customerId").val();
         var senderId = $("#senderId").val();
         var senderDate = $("#senderDate").val();
-        var totalMoney = $("#totalMoney").val();
+        var totalMoney = $("#orderMoney").attr("title");
         if(senderId.length == 0)
         {
             layer.alert("请选择送货人");
@@ -244,6 +245,7 @@
                     if(orderId.length == 0)
                     {
                         orderId = re.id;
+                        $("#orderId").val(orderId);
                     }
                     saveOrderDetail(orderId);
                 }
@@ -313,8 +315,17 @@
 
         if(isSuccess)
         {
-            refresh_layer_close();
+            //refresh_layer_close();
+            layer.msg('已保存!',{icon:1,time:1000},function(){
+                orderRefresh(orderId);
+            });
         }
+    }
+
+    function orderRefresh(orderId)
+    {
+        var url = "/order/addOrder.do?id=" + orderId;
+        location.replace(url);
     }
 </script>
 </body>

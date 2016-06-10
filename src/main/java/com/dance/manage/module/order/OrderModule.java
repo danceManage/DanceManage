@@ -1,13 +1,16 @@
 package com.dance.manage.module.order;
 
+import com.dance.manage.bean.sys.SysLogEnum;
 import com.dance.manage.bean.user.CustomerInfo;
 import com.dance.manage.bean.order.OrderDetail;
 import com.dance.manage.bean.order.OrderInfo;
 import com.dance.manage.bean.user.SenderInfo;
 import com.dance.manage.bean.user.UserInfo;
+import com.dance.manage.module.sys.SystemLogger;
 import com.dance.manage.utils.ExportExcelUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.json.JSONObject;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.dao.Sqls;
@@ -18,9 +21,11 @@ import org.nutz.ioc.loader.annotation.IocBean;
 import org.nutz.lang.util.NutMap;
 import org.nutz.mvc.adaptor.JsonAdaptor;
 import org.nutz.mvc.annotation.*;
+import org.nutz.mvc.filter.CheckSession;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.sql.Connection;
@@ -42,6 +47,7 @@ import java.util.*;
 @At("/order")
 @Fail("http:500")
 @Ok("json:{locked:'password|salt',ignoreNull:true}")
+@Filters(@By(type=CheckSession.class, args={UserInfo.USER_SESSION_ID, "/"}))
 public class OrderModule {
 
     @Inject
@@ -51,7 +57,7 @@ public class OrderModule {
     @Ok("re:jsp:jsp/order/orderList")
     @Filters
     public String productList(@Param("startDate")String startDate,@Param("endDate")String endDate,
-                              @Param("orderNo")String orderNo,@Param("page")Integer page,
+                              @Param("orderNo")String orderNo,@Param("customerId") Integer customerId,@Param("page")Integer page,
                               @Param("pageSize")Integer pageSize, HttpServletRequest request)
     {
         if (page == null)
@@ -66,7 +72,7 @@ public class OrderModule {
         int startPos = (page - 1) * pageSize;
 
         StringBuffer sqlBuffer = new StringBuffer();
-        sqlBuffer.append("select odf.id as orderId,odf.orderNo,odf.orderDate,odf.senderDate,sd.userName as sendName,cm.customerName,us.userName \n");
+        sqlBuffer.append("select odf.id as orderId,odf.orderNo,odf.orderDate,odf.senderDate,odf.totalMoney,sd.userName as sendName,cm.customerName,us.userName \n");
         sqlBuffer.append("from orderinfo odf \n");
         sqlBuffer.append("left join sendInfo sd \n");
         sqlBuffer.append("on odf.senderId = sd.id \n");
@@ -77,15 +83,19 @@ public class OrderModule {
         sqlBuffer.append("where 1=1 \n");
         if(StringUtils.isNotBlank(startDate))
         {
-            sqlBuffer.append("and odf.orderDate >= '" + startDate + "'");
+            sqlBuffer.append("and odf.orderDate >= '" + startDate + "' \n");
         }
         if(StringUtils.isNotBlank(endDate))
         {
-            sqlBuffer.append("and odf.orderDate <= '" + endDate + "'");
+            sqlBuffer.append("and odf.orderDate <= '" + endDate + "' \n");
         }
         if(StringUtils.isNotBlank(orderNo))
         {
-            sqlBuffer.append("and odf.orderNo like '%" + orderNo + "%'");
+            sqlBuffer.append("and odf.orderNo like '%" + orderNo + "%' \n");
+        }
+        if(customerId != null)
+        {
+            sqlBuffer.append("and odf.customerId = " + customerId + "\n");
         }
         sqlBuffer.append("order by odf.orderDate desc,odf.createTime desc \n");
         sqlBuffer.append("limit " + startPos + "," + pageSize + "\n");
@@ -99,6 +109,7 @@ public class OrderModule {
                     Map map = new HashMap();
                     map.put("orderId",rs.getInt("orderId"));
                     map.put("orderNo",rs.getString("orderNo"));
+                    map.put("totalMoney",rs.getString("totalMoney"));
                     map.put("orderDate", rs.getDate("orderDate"));
                     map.put("senderDate", rs.getDate("senderDate"));
                     map.put("sendName", rs.getString("sendName"));
@@ -112,7 +123,11 @@ public class OrderModule {
         dao.execute(sql);
         int total =  dao.count(OrderInfo.class,null);
         List<Map> mapList = sql.getList(Map.class);
+        List<CustomerInfo> customerInfoList = dao.query(CustomerInfo.class,null);
+
+        request.setAttribute("customerInfoList",customerInfoList);
         request.setAttribute("total",total);
+        request.setAttribute("customerId",customerId);
         request.setAttribute("page",page);
         request.setAttribute("startDate",startDate);
         request.setAttribute("endDate",endDate);
@@ -173,7 +188,7 @@ public class OrderModule {
     @AdaptBy(type=JsonAdaptor.class)
     @At("/saveOrder")
     @Ok("json:{locked:'password|salt'}")
-    public Object saveOrder(@Param("..")OrderInfo orderInfo) {
+    public Object saveOrder(@Param("..")OrderInfo orderInfo,HttpSession session) {
         NutMap re = new NutMap();
         if(StringUtils.isBlank(String.valueOf(orderInfo.getId())) || orderInfo.getId() == 0)
         {
@@ -188,6 +203,13 @@ public class OrderModule {
             orderInfo1.setSenderId(orderInfo.getSenderId());
             orderInfo1.setState(1);
             dao.insert(orderInfo1);
+
+            UserInfo userInfo = (UserInfo) session.getAttribute(UserInfo.USER_SESSION_ID);
+            if(userInfo != null)
+            {
+                SystemLogger.getInstance().logger(userInfo.getId(), SysLogEnum.SYSINSERT.getName(), "添加订单[" + new JSONObject(orderInfo1) + "]");
+            }
+
             re.put("id", orderInfo1.getId());
             re.put("ok", true);
         }
@@ -201,6 +223,11 @@ public class OrderModule {
             orderInfo1.setSenderDate(orderInfo.getSenderDate());
             orderInfo1.setSenderId(orderInfo.getSenderId());
             dao.update(orderInfo1);
+            UserInfo userInfo = (UserInfo) session.getAttribute(UserInfo.USER_SESSION_ID);
+            if(userInfo != null)
+            {
+                SystemLogger.getInstance().logger(userInfo.getId(), SysLogEnum.SYSEDIT.getName(), "修改订单[" + new JSONObject(orderInfo1) + "]");
+            }
             re.put("id", orderInfo1.getId());
             re.put("ok", true);
         }
@@ -210,7 +237,7 @@ public class OrderModule {
     @AdaptBy(type=JsonAdaptor.class)
     @At("/saveOrderDetail")
     @Ok("json:{locked:'password|salt'}")
-    public Object saveOrderDetail(@Param("..")OrderDetail orderDetail) {
+    public Object saveOrderDetail(@Param("..")OrderDetail orderDetail,HttpSession session) {
         NutMap re = new NutMap();
         if(StringUtils.isBlank(String.valueOf(orderDetail.getId())) || orderDetail.getId() == 0)
         {
@@ -222,6 +249,12 @@ public class OrderModule {
             orderDetail1.setOrderId(orderDetail.getOrderId());
             orderDetail1.setTotalMoney(orderDetail.getTotalMoney());
             dao.insert(orderDetail1);
+
+            UserInfo userInfo = (UserInfo) session.getAttribute(UserInfo.USER_SESSION_ID);
+            if(userInfo != null)
+            {
+                SystemLogger.getInstance().logger(userInfo.getId(), SysLogEnum.SYSINSERT.getName(), "添加订单明细[" + new JSONObject(orderDetail1) + "]");
+            }
             re.put("ok", true);
         }
         else
@@ -233,6 +266,12 @@ public class OrderModule {
             orderDetail1.setAmount(orderDetail.getAmount());
             orderDetail1.setTotalMoney(orderDetail.getTotalMoney());
             dao.update(orderDetail1);
+
+            UserInfo userInfo = (UserInfo) session.getAttribute(UserInfo.USER_SESSION_ID);
+            if(userInfo != null)
+            {
+                SystemLogger.getInstance().logger(userInfo.getId(), SysLogEnum.SYSEDIT.getName(), "修改订单明细[" + new JSONObject(orderDetail1) + "]");
+            }
             re.put("ok", true);
         }
         return re;
@@ -241,13 +280,19 @@ public class OrderModule {
     @AdaptBy(type=JsonAdaptor.class)
     @At("/delOrderDetail")
     @Ok("json:{locked:'password|salt'}")
-    public Object delOrderDetail(@Param("..")OrderDetail orderDetail) {
+    public Object delOrderDetail(@Param("..")OrderDetail orderDetail,HttpSession session) {
         NutMap re = new NutMap();
         OrderDetail orderDetail1 = dao.fetch(OrderDetail.class,Cnd.where("id","=",orderDetail.getId()));
         if(orderDetail1 != null)
         {
             dao.delete(orderDetail1);
             re.put("ok", true);
+
+            UserInfo userInfo = (UserInfo) session.getAttribute(UserInfo.USER_SESSION_ID);
+            if(userInfo != null)
+            {
+                SystemLogger.getInstance().logger(userInfo.getId(), SysLogEnum.SYSDELETE.getName(), "删除订单明细[" + new JSONObject(orderDetail1) + "]");
+            }
         }
         else
         {
@@ -259,7 +304,7 @@ public class OrderModule {
     @AdaptBy(type=JsonAdaptor.class)
     @At("/delOrder")
     @Ok("json:{locked:'password|salt'}")
-    public Object delOrder(@Param("..")OrderInfo orderInfo) {
+    public Object delOrder(@Param("..")OrderInfo orderInfo,HttpSession session) {
         NutMap re = new NutMap();
         OrderInfo orderInfo1 = dao.fetch(OrderInfo.class,Cnd.where("id","=",orderInfo.getId()));
         if(orderInfo1 != null)
@@ -268,6 +313,12 @@ public class OrderModule {
             dao.clear("order_detail", Cnd.where("orderId", "=" ,orderInfo.getId()));
             dao.delete(orderInfo1);
             re.put("ok", true);
+
+            UserInfo userInfo = (UserInfo) session.getAttribute(UserInfo.USER_SESSION_ID);
+            if(userInfo != null)
+            {
+                SystemLogger.getInstance().logger(userInfo.getId(), SysLogEnum.SYSDELETE.getName(), "删除订单[" + new JSONObject(orderInfo) + "]");
+            }
         }
         else
         {
@@ -290,7 +341,7 @@ public class OrderModule {
         }
 
         StringBuffer sqlBuffer = new StringBuffer();
-        sqlBuffer.append("select odf.id as orderId,odf.orderNo,odf.orderDate,odf.senderDate," +
+        sqlBuffer.append("select odf.id as orderId,odf.orderNo,odf.orderDate,odf.senderDate,odf.totalMoney," +
                 "sd.userName as sendName,cm.customerPhone,cm.customerAddress,cm.customerName,us.userName \n");
         sqlBuffer.append("from orderinfo odf \n");
         sqlBuffer.append("left join sendInfo sd \n");
@@ -311,6 +362,7 @@ public class OrderModule {
                     Map map = new HashMap();
                     map.put("orderId", rs.getInt("orderId"));
                     map.put("orderNo",rs.getString("orderNo"));
+                    map.put("totalMoney",rs.getDouble("totalMoney"));
                     map.put("orderDate", rs.getDate("orderDate"));
                     map.put("senderDate", rs.getDate("senderDate"));
                     map.put("sendName", rs.getString("sendName"));
@@ -327,13 +379,15 @@ public class OrderModule {
         List<Map> mapList = sql.getList(Map.class);
         if(mapList != null && mapList.size() > 0)
         {
-            String fileName = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".xls";
             if(!filePath.endsWith(File.separator))
             {
                 filePath = filePath + File.separator;
             }
             List<OrderDetail> orderDetailList = dao.query(OrderDetail.class,Cnd.where("orderId","=",id));
             HSSFWorkbook wb = ExportExcelUtils.exportOrder(mapList.get(0),orderDetailList);
+
+            String orderNo = (String) mapList.get(0).get("orderNo");
+            String fileName = orderNo + ".xls";
             FileOutputStream fileOutputStream = new FileOutputStream(filePath + fileName);
             wb.write(fileOutputStream);
             fileOutputStream.flush();

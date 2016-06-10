@@ -1,6 +1,9 @@
 package com.dance.manage.module.user;
 
+import com.dance.manage.bean.sys.SysLogEnum;
+import com.dance.manage.module.sys.SystemLogger;
 import com.dance.manage.bean.user.UserInfo;
+import org.json.JSONObject;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.ioc.loader.annotation.Inject;
@@ -11,6 +14,7 @@ import org.nutz.mvc.annotation.*;
 import org.nutz.mvc.filter.CheckSession;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.Date;
 import java.util.List;
 
@@ -27,7 +31,7 @@ import java.util.List;
 @At("/user")
 @Fail("http:500")
 @Ok("json:{locked:'password|salt',ignoreNull:true}")
-//@Filters(@By(type=CheckSession.class, args={UserInfo.USER_SESSION_ID, "/"}))
+@Filters(@By(type=CheckSession.class, args={UserInfo.USER_SESSION_ID, "/"}))
 public class UserModule {
 
     @Inject
@@ -87,6 +91,8 @@ public class UserModule {
             userInfo1.setState(0);
             dao.insert(userInfo1);
             re.put("ok", true);
+
+            SystemLogger.getInstance().logger(userInfo1.getId(), SysLogEnum.SYSINSERT.getName(), "添加用户[" + new JSONObject(user) + "]");
         }
         return re;
     }
@@ -109,6 +115,7 @@ public class UserModule {
         if(userInfo != null)
         {
             dao.delete(userInfo);
+            SystemLogger.getInstance().logger(userInfo.getId(), SysLogEnum.SYSDELETE.getName(), "删除用户[" + new JSONObject(user) + "]");
             re.put("ok", true);
         }
         else
@@ -116,5 +123,13 @@ public class UserModule {
             re.put("ok", false);
         }
         return re;
+    }
+
+    @At("/logout")
+    @Ok("re:jsp:jsp/index")
+    public String logout(HttpSession session)
+    {
+        session.invalidate();
+        return "redirect:/user/index.do";
     }
 }

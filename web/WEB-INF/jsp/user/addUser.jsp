@@ -157,7 +157,7 @@
             {
                 if(re.ok)
                 {
-                    layer_close();
+                    refresh_layer_close();
                 }
                 else
                 {

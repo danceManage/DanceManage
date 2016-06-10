@@ -20,6 +20,7 @@
     <link href="/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
     <link href="/css/style.css" rel="stylesheet" type="text/css" />
     <link href="/css/iconfont.css" rel="stylesheet" type="text/css" />
+    <link href="/css/iconfont/iconfont.css" rel="stylesheet" type="text/css" />
     <!--[if IE 6]>
     <script type="text/javascript" src="/script/DD_belatedPNG_0.0.8a-min.js" ></script>
     <script>DD_belatedPNG.fix('*');</script>
@@ -37,7 +38,13 @@
         <input type="text" onfocus="WdatePicker({maxDate:'#F{$dp.$D(\'endDate\')||\'%y-%M-%d\'}'})" value="${startDate}" id="startDate" class="input-text Wdate" style="width:120px;">
         -
         <input type="text" onfocus="WdatePicker({minDate:'#F{$dp.$D(\'startDate\')}',maxDate:'%y-%M-%d'})" value="${endDate}" id="endDate" class="input-text Wdate" style="width:120px;">
-        <input type="text" class="input-text" style="width:250px" placeholder="输入订单号" value="${orderNo}" id="orderNo">
+        <input type="text" class="input-text" style="width:200px" placeholder="输入订单号" value="${orderNo}" id="orderNo">
+        <select name="customerId" id="customerId">
+            <option value="">--请选择客户--</option>
+            <c:forEach items="${customerInfoList}" var="customer">
+                <option value="${customer.id}" <c:if test="${customerId == customer.id}">selected="selected"</c:if>>${customer.customerName}</option>
+            </c:forEach>
+        </select>
         <button type="button" class="btn btn-success" onclick="doSearch();"><i class="Hui-iconfont">&#xe665;</i> 搜索</button>
     </div>
     <div class="cl pd-5 bg-1 bk-gray mt-20">
@@ -47,7 +54,7 @@
     <table class="table table-border table-bordered table-bg">
         <thead>
         <tr>
-            <th scope="col" colspan="9">员工列表</th>
+            <th scope="col" colspan="10">员工列表</th>
         </tr>
         <tr class="text-c">
             <th width="25"><input type="checkbox" name="" value=""></th>
@@ -55,7 +62,8 @@
             <th width="40">订单号</th>
             <th width="150">客户</th>
             <th width="90">送货人</th>
-            <th width="150">操作人</th>
+            <th width="90">金额</th>
+            <th width="100">操作人</th>
             <th>订单日期</th>
             <th width="130">送货日期</th>
             <th width="100">操作</th>
@@ -69,6 +77,7 @@
                 <td>${order.orderNo}</td>
                 <td>${order.customerName}</td>
                 <td>${order.sendName}</td>
+                <td>${order.totalMoney}</td>
                 <td>${order.userName}</td>
                 <td>${order.orderDate}</td>
                 <td>${order.senderDate}</td>
@@ -76,10 +85,16 @@
                     <%--<td class="td-status"><span class="label radius">已停用</span></td>--%>
                 <td class="td-manage">
                     <%--<a style="text-decoration:none" onClick="admin_stop(this,'10001')" href="javascript:;" title="停用"><i class="Hui-iconfont">&#xe631;</i></a>--%>
-                    <a title="编辑" href="javascript:;" onclick="order_edit('订单编辑','/order/addOrder.do?id=${order.orderId}')" class="ml-5" style="text-decoration:none">
+                    <a title="下载Excel" href="javascript:void(0);" onclick="exportExcel('${order.orderId}');" class="ml-5" style="text-decoration:none">
+                        <i class="icon iconfont">&#xe602;</i>
+                    </a>
+                    <a title="编辑" href="javascript:void(0);" onclick="order_edit('订单编辑','/order/addOrder.do?id=${order.orderId}')" class="ml-5" style="text-decoration:none">
                         <i class="Hui-iconfont">&#xe6df;</i>
                     </a>
-                    <a title="删除" href="javascript:;" onclick="order_del(this,'${order.orderId}')" class="ml-5" style="text-decoration:none"><i class="Hui-iconfont">&#xe6e2;</i></a></td>
+                    <a title="删除" href="javascript:void(0);" onclick="order_del(this,'${order.orderId}')" class="ml-5" style="text-decoration:none">
+                        <i class="Hui-iconfont">&#xe6e2;</i>
+                    </a>
+                </td>
             </tr>
         </c:forEach>
         </tbody>
@@ -145,12 +160,18 @@
         layer.full(index);
     }
 
+    function exportExcel(orderId)
+    {
+        location.href = '/order/excel/export.do?id=' + orderId;
+    }
+
     function doSearch()
     {
         var url = "/order/orderList.do?page=1";
         var startDate = $("#startDate").val();
         var endDate = $("#endDate").val();
         var orderNo = $("#orderNo").val();
+        var customerId = $("#customerId").val();
         if(startDate.length > 0)
         {
             url += "&startDate=" + startDate;
@@ -162,6 +183,10 @@
         if(orderNo.length > 0)
         {
             url += "&orderNo=" + orderNo;
+        }
+        if(customerId.length > 0)
+        {
+            url += "&customerId=" + customerId;
         }
         location.href = url;
     }
@@ -175,30 +200,32 @@
         }
         else
         {
-            var isSuccess = false;
-            $("input[name='checkOrder']:checked").each(function(){
-                $.ajax({
-                    url : "/order/delOrder.do",
-                    contentType: "application/x-www-form-urlencoded; charset=utf-8",
-                    dataType:"json",
-                    type:"POST",
-                    async:false,
-                    data: $.toJSON({id:$(this).val()}),
-                    success: function(re)
-                    {
-                        if(re.ok)
+            layer.confirm('确认要删除订单吗？',function(index){
+                var isSuccess = false;
+                $("input[name='checkOrder']:checked").each(function(){
+                    $.ajax({
+                        url : "/order/delOrder.do",
+                        contentType: "application/x-www-form-urlencoded; charset=utf-8",
+                        dataType:"json",
+                        type:"POST",
+                        async:false,
+                        data: $.toJSON({id:$(this).val()}),
+                        success: function(re)
                         {
-                            isSuccess = true;
-                            $(this).parent().parent().remove();
+                            if(re.ok)
+                            {
+                                isSuccess = true;
+                                $(this).parent().parent().remove();
+                            }
                         }
-                    }
+                    });
                 });
+                if(isSuccess)
+                {
+                    layer.msg('已删除!',{icon:1,time:1000});
+                    refreshDiv();
+                }
             });
-            if(isSuccess)
-            {
-                layer.msg('已删除!',{icon:1,time:1000});
-                refreshDiv();
-            }
         }
     }
 
@@ -211,8 +238,7 @@
 
     function order_del(obj,orderId)
     {
-        if(confirm("确认删除该订单？"))
-        {
+        layer.confirm('确认要删除订单吗？',function(index){
             $.ajax({
                 url : "/order/delOrder.do",
                 contentType: "application/x-www-form-urlencoded; charset=utf-8",
@@ -230,7 +256,7 @@
                     }
                 }
             });
-        }
+        });
     }
 
     /*管理员-删除*/

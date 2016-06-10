@@ -1,6 +1,7 @@
 package com.dance.manage.module.user;
 
 import com.dance.manage.bean.user.CustomerInfo;
+import com.dance.manage.bean.user.UserInfo;
 import org.apache.commons.lang.StringUtils;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
@@ -9,6 +10,7 @@ import org.nutz.ioc.loader.annotation.IocBean;
 import org.nutz.lang.util.NutMap;
 import org.nutz.mvc.adaptor.JsonAdaptor;
 import org.nutz.mvc.annotation.*;
+import org.nutz.mvc.filter.CheckSession;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
@@ -27,6 +29,7 @@ import java.util.List;
 @At("/customer")
 @Fail("http:500")
 @Ok("json:{locked:'password|salt',ignoreNull:true}")
+@Filters(@By(type=CheckSession.class, args={UserInfo.USER_SESSION_ID, "/"}))
 public class CustomerModule {
 
     @Inject

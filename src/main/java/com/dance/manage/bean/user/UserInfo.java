@@ -40,6 +40,9 @@ public class UserInfo {
     @Column("state")
     private Integer state;//0：正常；1：锁定
 
+    @Column("roleType")
+    private int roleType;
+
     @Column("createTime")
     private Date createTime;
 
@@ -111,5 +114,15 @@ public class UserInfo {
     public void setSalt(String salt)
     {
         this.salt = salt;
+    }
+
+    public int getRoleType()
+    {
+        return roleType;
+    }
+
+    public void setRoleType(int roleType)
+    {
+        this.roleType = roleType;
     }
 }

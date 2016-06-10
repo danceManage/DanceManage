@@ -4,7 +4,9 @@ import com.dance.manage.bean.order.OrderDetail;
 import com.dance.manage.bean.order.OrderInfo;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.text.DecimalFormat;
@@ -67,10 +69,14 @@ public class ExportExcelUtils {
         Font font = wb.createFont();
         font.setColor(HSSFColor.BLACK.index);
         font.setBoldweight(Font.BOLDWEIGHT_BOLD); // 粗体
-        font.setFontHeightInPoints((short)24);
+        font.setFontHeightInPoints((short) 24);
         style1.setFont(font);
         style1.setAlignment(HSSFCellStyle.ALIGN_CENTER); // 水平居中
         style1.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER); // 垂直居中
+        style1.setBorderTop((short) 1);
+        style1.setBorderBottom((short) 1);
+        style1.setBottomBorderColor(HSSFColor.BLACK.index);
+        style1.setTopBorderColor(HSSFColor.BLACK.index);
 
         HSSFCellStyle style2 = wb.createCellStyle();
         Font font1 = wb.createFont();
@@ -169,14 +175,26 @@ public class ExportExcelUtils {
 
         sheet.addMergedRegion(new CellRangeAddress(5,5,0,13));
 
+        CellStyle cellStyle=wb.createCellStyle();
+        cellStyle.setBorderBottom(CellStyle.BORDER_THIN); // 底部边框
+        cellStyle.setBottomBorderColor(IndexedColors.BLACK.getIndex()); // 底部边框颜色
+        cellStyle.setBorderLeft(CellStyle.BORDER_THIN);  // 左边边框
+        cellStyle.setLeftBorderColor(IndexedColors.BLACK.getIndex()); // 左边边框颜色
+        cellStyle.setBorderRight(CellStyle.BORDER_THIN); // 右边边框
+        cellStyle.setRightBorderColor(IndexedColors.BLACK.getIndex());  // 右边边框颜色
+        cellStyle.setBorderTop(CellStyle.BORDER_THIN); // 上边边框
+        cellStyle.setTopBorderColor(IndexedColors.BLACK.getIndex());  // 上边边框颜色
+        cellStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER); // 水平居中
+        cellStyle.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER); // 垂直居中
+
         hssfRow = sheet.createRow(6);
         hssfCell = hssfRow.createCell(0);
-        sheet.addMergedRegion(new CellRangeAddress(6,6,0,1));
+        sheet.addMergedRegion(new CellRangeAddress(6,6,0,2));
         hssfCell.setCellStyle(style);
         hssfCell.setCellValue("品种");
 
         hssfCell = hssfRow.createCell(3);
-        sheet.addMergedRegion(new CellRangeAddress(6,6,3,4));
+        sheet.addMergedRegion(new CellRangeAddress(6,6,3,5));
         hssfCell.setCellStyle(style);
         hssfCell.setCellValue("数量");
 
@@ -185,15 +203,17 @@ public class ExportExcelUtils {
         hssfCell.setCellStyle(style);
         hssfCell.setCellValue("单位");
 
-        hssfCell = hssfRow.createCell(9);
-        sheet.addMergedRegion(new CellRangeAddress(6,6,9,10));
+        hssfCell = hssfRow.createCell(8);
+        sheet.addMergedRegion(new CellRangeAddress(6,6,8,10));
         hssfCell.setCellStyle(style);
-        hssfCell.setCellValue("价格");
+        hssfCell.setCellValue("价格(元)");
 
-        hssfCell = hssfRow.createCell(12);
-        sheet.addMergedRegion(new CellRangeAddress(6,6,12,13));
+        hssfCell = hssfRow.createCell(11);
+        sheet.addMergedRegion(new CellRangeAddress(6,6,11,13));
         hssfCell.setCellStyle(style);
-        hssfCell.setCellValue("总价");
+        hssfCell.setCellValue("总价(元)");
+
+        setCellBorder(hssfRow,cellStyle);
 
         DecimalFormat decimalFormat = new DecimalFormat("#,###.00");
 
@@ -203,12 +223,12 @@ public class ExportExcelUtils {
             OrderDetail detail = detailList.get(i);
             hssfRow = sheet.createRow( _rowNum );
             hssfCell = hssfRow.createCell(0);
-            sheet.addMergedRegion(new CellRangeAddress(_rowNum,_rowNum,0,1));
+            sheet.addMergedRegion(new CellRangeAddress(_rowNum,_rowNum,0,2));
             hssfCell.setCellStyle(style);
             hssfCell.setCellValue(detail.getProductName());
 
             hssfCell = hssfRow.createCell(3);
-            sheet.addMergedRegion(new CellRangeAddress(_rowNum,_rowNum,3,4));
+            sheet.addMergedRegion(new CellRangeAddress(_rowNum,_rowNum,3,5));
             hssfCell.setCellStyle(style);
             hssfCell.setCellValue(detail.getAmount());
 
@@ -217,19 +237,41 @@ public class ExportExcelUtils {
             hssfCell.setCellStyle(style);
             hssfCell.setCellValue(detail.getUnit());
 
-            hssfCell = hssfRow.createCell(9);
-            sheet.addMergedRegion(new CellRangeAddress(_rowNum,_rowNum,9,10));
+            hssfCell = hssfRow.createCell(8);
+            sheet.addMergedRegion(new CellRangeAddress(_rowNum,_rowNum,8,10));
             hssfCell.setCellStyle(style);
             hssfCell.setCellValue(decimalFormat.format(detail.getPrice()));
 
-            hssfCell = hssfRow.createCell(12);
-            sheet.addMergedRegion(new CellRangeAddress(_rowNum,_rowNum,12,13));
+            hssfCell = hssfRow.createCell(11);
+            sheet.addMergedRegion(new CellRangeAddress(_rowNum,_rowNum,11,13));
             hssfCell.setCellStyle(style);
             hssfCell.setCellValue(decimalFormat.format(detail.getTotalMoney()));
+
+            setCellBorder(hssfRow,cellStyle);
         }
 
-        sheet.addMergedRegion(new CellRangeAddress((6 + detailList.size() + 1),(6 + detailList.size() + 1),0,13));
-        int lastRows = 6 + detailList.size() + 2;
+        hssfRow = sheet.createRow((6 + detailList.size() + 1));
+        hssfCell = hssfRow.createCell(0);
+        sheet.addMergedRegion(new CellRangeAddress((6 + detailList.size() + 1),(6 + detailList.size() + 1),0,2));
+        hssfCell.setCellStyle(style);
+        hssfCell.setCellValue("合计：");
+
+        Double orderMoney = (Double) orderMap.get("totalMoney");
+        hssfCell = hssfRow.createCell(3);
+        hssfCell.setCellValue("￥ " + decimalFormat.format(orderMoney));
+        sheet.addMergedRegion(new CellRangeAddress((6 + detailList.size() + 1), (6 + detailList.size() + 1), 3, 13));
+        setCellBorder(hssfRow,cellStyle);
+
+        CellStyle cellStyle1 = wb.createCellStyle();
+        cellStyle1.setAlignment(HSSFCellStyle.ALIGN_RIGHT); // 水平居中
+        cellStyle1.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER); // 居右
+        cellStyle1.setBorderBottom(CellStyle.BORDER_THIN); // 底部边框
+        cellStyle1.setBottomBorderColor(IndexedColors.BLACK.getIndex()); // 底部边框颜色
+        hssfCell.setCellStyle(cellStyle1);
+
+        sheet.addMergedRegion(new CellRangeAddress((6 + detailList.size() + 2),(6 + detailList.size() + 2),0,13));
+
+        int lastRows = 6 + detailList.size() + 3;
         hssfRow = sheet.createRow(lastRows);
 
         hssfCell = hssfRow.createCell(0);
@@ -245,5 +287,23 @@ public class ExportExcelUtils {
         sheet.addMergedRegion(new CellRangeAddress(lastRows,lastRows,12,13));
 
         return wb;
+    }
+
+    /**
+     * 设置边框
+     * @param hssfRow
+     * @param cellStyle
+     */
+    protected static void setCellBorder(HSSFRow hssfRow,CellStyle cellStyle)
+    {
+        for(int i=0; i < 14; i ++ )
+        {
+            HSSFCell detailCell = hssfRow.getCell(i);
+            if(detailCell == null )
+            {
+                detailCell = hssfRow.createCell(i);
+            }
+            detailCell.setCellStyle(cellStyle);
+        }
     }
 }
