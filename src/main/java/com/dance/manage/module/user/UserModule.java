@@ -3,6 +3,8 @@ package com.dance.manage.module.user;
 import com.dance.manage.bean.sys.SysLogEnum;
 import com.dance.manage.module.sys.SystemLogger;
 import com.dance.manage.bean.user.UserInfo;
+import com.dance.manage.utils.DesUtils;
+import com.dance.manage.utils.Toolkit;
 import org.json.JSONObject;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
@@ -12,6 +14,7 @@ import org.nutz.lang.util.NutMap;
 import org.nutz.mvc.adaptor.JsonAdaptor;
 import org.nutz.mvc.annotation.*;
 import org.nutz.mvc.filter.CheckSession;
+import sun.security.krb5.internal.Ticket;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -40,8 +43,18 @@ public class UserModule {
     @At("/logon")
     @Ok("re:jsp:jsp/index")
     @Filters
-    public String login(String logonId,String password,HttpServletRequest request)
+    public String login(String logonId,String password,String yzmText,HttpServletRequest request) throws Exception
     {
+        String yzmInfo = (String) request.getSession().getAttribute(Toolkit.captcha_attr);
+
+        if(!yzmText.equalsIgnoreCase(yzmInfo))
+        {
+            request.setAttribute("errorMsg", "验证码错误");
+            return "jsp:/logon";
+        }
+
+        password = DesUtils.encrypt(password);
+
         UserInfo userInfo = dao.fetch(UserInfo.class, Cnd.where("logonId", "=", logonId).and("password", "=", password));
 
         if(userInfo != null)
@@ -73,7 +86,7 @@ public class UserModule {
     @AdaptBy(type=JsonAdaptor.class)
     @At("/saveUser")
     @Ok("json:{locked:'password|salt'}")
-    public Object saveUser(@Param("..")UserInfo user) {
+    public Object saveUser(@Param("..")UserInfo user) throws Exception{
         NutMap re = new NutMap();
         UserInfo userInfo = dao.fetch(UserInfo.class,Cnd.where("logonId","=",user.getLogonId()));
         if(userInfo != null)
@@ -86,7 +99,7 @@ public class UserModule {
             UserInfo userInfo1 = new UserInfo();
             userInfo1.setLogonId(user.getLogonId());
             userInfo1.setUserName(user.getUserName());
-            userInfo1.setPassword(user.getPassword());
+            userInfo1.setPassword(DesUtils.encrypt(user.getPassword()));
             userInfo1.setCreateTime(new Date());
             userInfo1.setState(0);
             dao.insert(userInfo1);

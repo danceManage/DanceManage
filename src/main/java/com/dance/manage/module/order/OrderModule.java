@@ -11,9 +11,7 @@ import com.dance.manage.utils.ExportExcelUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.json.JSONObject;
-import org.nutz.dao.Cnd;
-import org.nutz.dao.Dao;
-import org.nutz.dao.Sqls;
+import org.nutz.dao.*;
 import org.nutz.dao.sql.Sql;
 import org.nutz.dao.sql.SqlCallback;
 import org.nutz.ioc.loader.annotation.Inject;
@@ -81,6 +79,7 @@ public class OrderModule {
         sqlBuffer.append("left join userinfo us \n");
         sqlBuffer.append("on odf.operatorId = us.id \n");
         sqlBuffer.append("where 1=1 \n");
+        sqlBuffer.append("and odf.isEnabled = 1 \n");
         if(StringUtils.isNotBlank(startDate))
         {
             sqlBuffer.append("and odf.orderDate >= '" + startDate + "' \n");
@@ -202,6 +201,7 @@ public class OrderModule {
             orderInfo1.setSenderDate(orderInfo.getSenderDate());
             orderInfo1.setSenderId(orderInfo.getSenderId());
             orderInfo1.setState(1);
+            orderInfo1.setIsEnabled(1);
             dao.insert(orderInfo1);
 
             UserInfo userInfo = (UserInfo) session.getAttribute(UserInfo.USER_SESSION_ID);
@@ -248,6 +248,7 @@ public class OrderModule {
             orderDetail1.setAmount(orderDetail.getAmount());
             orderDetail1.setOrderId(orderDetail.getOrderId());
             orderDetail1.setTotalMoney(orderDetail.getTotalMoney());
+            orderDetail1.setIsEnabled(1);
             dao.insert(orderDetail1);
 
             UserInfo userInfo = (UserInfo) session.getAttribute(UserInfo.USER_SESSION_ID);
@@ -285,7 +286,9 @@ public class OrderModule {
         OrderDetail orderDetail1 = dao.fetch(OrderDetail.class,Cnd.where("id","=",orderDetail.getId()));
         if(orderDetail1 != null)
         {
-            dao.delete(orderDetail1);
+            orderDetail1.setIsEnabled(0);
+            //dao.delete(orderDetail1);
+            dao.update(orderDetail1);
             re.put("ok", true);
 
             UserInfo userInfo = (UserInfo) session.getAttribute(UserInfo.USER_SESSION_ID);
@@ -310,8 +313,11 @@ public class OrderModule {
         if(orderInfo1 != null)
         {
 
-            dao.clear("order_detail", Cnd.where("orderId", "=" ,orderInfo.getId()));
-            dao.delete(orderInfo1);
+            dao.update(OrderDetail.class, org.nutz.dao.Chain.make("isEnabled",0),Cnd.where("orderId", "=" ,orderInfo.getId()));
+            orderInfo1.setIsEnabled(0);
+            dao.update(orderInfo1);
+            //dao.clear("order_detail", Cnd.where("orderId", "=" ,orderInfo.getId()));
+            //dao.delete(orderInfo1);
             re.put("ok", true);
 
             UserInfo userInfo = (UserInfo) session.getAttribute(UserInfo.USER_SESSION_ID);

@@ -44,7 +44,7 @@
             </div>
             <div class="row cl">
                 <div class="formControls col-8 col-offset-3">
-                    <input class="input-text size-L" type="text" id="yzmText" placeholder="验证码" onblur="if(this.value==''){this.value='验证码:'}"
+                    <input class="input-text size-L" type="text" id="yzmText" name="yzmText" placeholder="验证码" onblur="if(this.value==''){this.value='验证码:'}"
                            onclick="if(this.value=='验证码:'){this.value='';}" value="验证码:" style="width:170px;">
                     <img src="/captcha/next" id="captcha_img"> <a id="kanbuq" href="javascript:void(0);" onclick="next_captcha();return false;">看不清，换一张</a> </div>
             </div>

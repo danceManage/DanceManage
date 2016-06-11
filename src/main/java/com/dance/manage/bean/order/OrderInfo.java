@@ -48,6 +48,9 @@ public class OrderInfo {
     @Column("state")
     private int state;//状态;0:草稿;1:正常;
 
+    @Column("isEnabled")
+    private int isEnabled;//是否有效；1：有效
+
     public int getId()
     {
         return id;
@@ -146,5 +149,15 @@ public class OrderInfo {
     public void setSenderDate(Date senderDate)
     {
         this.senderDate = senderDate;
+    }
+
+    public int getIsEnabled()
+    {
+        return isEnabled;
+    }
+
+    public void setIsEnabled(int isEnabled)
+    {
+        this.isEnabled = isEnabled;
     }
 }

@@ -37,6 +37,9 @@ public class OrderDetail {
     @Column("totalMoney")
     private double totalMoney;//单行总价
 
+    @Column("isEnabled")
+    private int isEnabled;//是否有效；1：有效
+
     public int getId()
     {
         return id;
@@ -105,5 +108,15 @@ public class OrderDetail {
     public void setTotalMoney(double totalMoney)
     {
         this.totalMoney = totalMoney;
+    }
+
+    public int getIsEnabled()
+    {
+        return isEnabled;
+    }
+
+    public void setIsEnabled(int isEnabled)
+    {
+        this.isEnabled = isEnabled;
     }
 }
