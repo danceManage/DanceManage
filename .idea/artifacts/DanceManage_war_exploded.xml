@@ -1,8 +1,7 @@
 <component name="ArtifactManager">
   <artifact type="exploded-war" build-on-make="true" name="DanceManage:war exploded">
-    <output-path>$PROJECT_DIR$/out/artifacts/DanceManage_war_exploded</output-path>
+    <output-path>$PROJECT_DIR$/target/danceManage-1.0-SNAPSHOT</output-path>
     <root id="root">
-      <element id="javaee-facet-resources" facet="DanceManage/web/Web" />
       <element id="directory" name="WEB-INF">
         <element id="directory" name="classes">
           <element id="module-output" name="DanceManage" />
@@ -14,14 +13,10 @@
           <element id="library" level="project" name="Maven: commons-pool:commons-pool:1.6" />
           <element id="library" level="project" name="Maven: commons-dbcp:commons-dbcp:1.4" />
           <element id="library" level="project" name="Maven: com.alibaba:druid:1.0.20" />
-          <element id="library" level="module" name="Maven: com.alibaba:jconsole:1.8.0" module-name="DanceManage" />
-          <element id="library" level="module" name="Maven: com.alibaba:tools:1.8.0" module-name="DanceManage" />
           <element id="library" level="project" name="Maven: cn.apiclub.tool:simplecaptcha:1.2.2" />
           <element id="library" level="project" name="Maven: org.apache.shiro:shiro-all:1.2.4" />
           <element id="library" level="project" name="Maven: org.apache.shiro:shiro-guice:1.2.4" />
           <element id="library" level="project" name="Maven: org.apache.shiro:shiro-core:1.2.4" />
-          <element id="library" level="project" name="Maven: org.slf4j:slf4j-api:1.6.4" />
-          <element id="library" level="project" name="Maven: commons-beanutils:commons-beanutils:1.8.3" />
           <element id="library" level="project" name="Maven: com.google.inject:guice:3.0" />
           <element id="library" level="project" name="Maven: javax.inject:javax.inject:1" />
           <element id="library" level="project" name="Maven: aopalliance:aopalliance:1.0" />
@@ -44,10 +39,17 @@
           <element id="library" level="project" name="Maven: org.apache.taglibs:taglibs-standard-spec:1.2.5" />
           <element id="library" level="project" name="Maven: org.apache.taglibs:taglibs-standard-jstlel:1.2.5" />
           <element id="library" level="project" name="Maven: commons-lang:commons-lang:2.6" />
-          <element id="library" level="project" name="poi-3.6" />
+          <element id="library" level="project" name="Maven: org.apache.poi:poi:3.6" />
           <element id="library" level="project" name="Maven: org.json:json:20141113" />
+          <element id="library" level="module" name="Maven: com.alibaba:jconsole:1.8.0" module-name="DanceManage" />
+          <element id="library" level="module" name="Maven: com.alibaba:tools:1.8.0" module-name="DanceManage" />
+          <element id="library" level="project" name="poi-3.6" />
         </element>
       </element>
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/target/MANIFEST.MF" />
+      </element>
+      <element id="javaee-facet-resources" facet="DanceManage/web/Web" />
     </root>
   </artifact>
 </component>

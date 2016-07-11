@@ -1,15 +1,13 @@
 package com.dance.manage.utils;
 
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
+import java.io.UnsupportedEncodingException;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
 
 import javax.crypto.*;
-import javax.crypto.spec.DESKeySpec;
-import java.io.UnsupportedEncodingException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
+import javax.crypto.spec.*;
+
+import sun.misc.*;
 
 /**
  * 标准加密工具类
@@ -191,7 +189,7 @@ public class DesUtils
 
     public static void main( String [] args ) throws Exception
     {
-        System.out.println(decrypt( "DpuaxALeu39+spBkBb/GWA==" ));
+        System.out.println(decrypt( "gC7uAfjDWBxX/6KjDg/MtzdHXthBhwwv" ));
 //        System.out.println(encrypt( "123456" ));
     }
 }

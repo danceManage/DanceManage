@@ -140,7 +140,7 @@ public class OrderModule {
     public String addOrder(@Param("id")Integer id,HttpServletRequest request)
     {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        String orderNo = "DD" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        String orderNo = "";
         String orderDate = "";
         String sendDate = "";
         if(id != null)
@@ -169,6 +169,10 @@ public class OrderModule {
         }
         else
         {
+            //查询当天有多少订单
+            int orderCnt = dao.count(OrderInfo.class,Cnd.where("DATE_FORMAT(createTime, '%Y-%m-%d')","=",new SimpleDateFormat("yyyy-MM-dd").format(new Date())));
+            orderCnt = ++orderCnt;
+            orderNo = "DD" + new SimpleDateFormat("yyyyMMdd").format(new Date()) + String.format("%03d",orderCnt);
             orderDate = format.format(new Date());
             sendDate = format.format(new Date());
         }
